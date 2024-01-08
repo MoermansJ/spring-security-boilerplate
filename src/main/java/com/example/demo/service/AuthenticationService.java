@@ -5,8 +5,8 @@ import com.example.demo.model.dto.AuthenticationRequest;
 import com.example.demo.model.dto.AuthenticationResponse;
 import com.example.demo.model.exception.AuthenticationException;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.util.encryption.StringEncodingUtil;
 import com.example.demo.util.validation.PasswordValidationUtil;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,11 +15,14 @@ import java.util.Optional;
 public class AuthenticationService {
     private UserRepository userRepository;
     private PasswordValidationUtil passwordValidationUtil;
+    private StringEncodingUtil stringEncodingUtil;
 
     public AuthenticationService(UserRepository userRepository,
-                                 PasswordValidationUtil passwordValidationUtil) {
+                                 PasswordValidationUtil passwordValidationUtil,
+                                 StringEncodingUtil stringEncodingUtil) {
         this.userRepository = userRepository;
         this.passwordValidationUtil = passwordValidationUtil;
+        this.stringEncodingUtil = stringEncodingUtil;
     }
 
     public AuthenticationResponse register(AuthenticationRequest authenticationRequest) throws AuthenticationException {
@@ -33,8 +36,9 @@ public class AuthenticationService {
         if (!passwordValidationUtil.isValidPassword(dtoPassword))
             throw new AuthenticationException("The password you entered does not meet the requirements.");
 
-        User newUser = new User(dtoUsername, dtoPassword);
-        return new AuthenticationResponse(dtoUsername, dtoPassword);
+        String encodedPassword = stringEncodingUtil.encodeString(dtoPassword);
+        userRepository.save(new User(dtoUsername, encodedPassword));
+        return new AuthenticationResponse(dtoUsername, encodedPassword);
     }
 
     public AuthenticationResponse login(AuthenticationRequest authenticationRequest) throws AuthenticationException {
@@ -47,7 +51,7 @@ public class AuthenticationService {
 
         User userFromDb = optUserFromDb.get();
 
-        if (!dtoPassword.equals(userFromDb.getPassword()))
+        if (!stringEncodingUtil.isEqual(dtoPassword, userFromDb.getPassword()))
             throw new AuthenticationException("The password you entered is incorrect.");
 
 //        String token = jwtUtil.createToken(userFromDb, "USER");
