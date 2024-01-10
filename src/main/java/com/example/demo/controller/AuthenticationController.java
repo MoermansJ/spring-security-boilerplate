@@ -38,6 +38,7 @@ public class AuthenticationController {
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to process requests at this time.");
         }
     }

@@ -1,7 +1,6 @@
-package com.example.demo.model;
+package com.example.demo.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,14 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table(name = "tb_user")
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String username;
     private String password;
 
-    public User(String username, String password) {
+    public UserEntity(String username, String password) {
         this.username = username;
         this.password = password;
     }
